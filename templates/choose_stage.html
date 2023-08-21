@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose_stage</title>
+</head>
+<body>
+<div>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+</div>
+<form method="POST" action="{{ url_for('choose_stage', username=username) }}">
+    <div class="grid-container">
+        <div>
+            <h2>Lịch sử thế giới</h2>
+            <ul>
+                {% for stage in stages %}
+                    {% if stage[0] == 0 %}
+
+                        <input type="radio" name="selected_stage" value="{{stage[0]}},{{stage[1]}}"> {{ stage[2] }} - có {{stage[3]}} bài
+                        <br>
+
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div>
+            <h2>Lịch sử Việt Nam</h2>
+            <ul>
+                {% for stage in stages %}
+                    {% if stage[0] == 1 %}
+                
+                        <input type="radio" name="selected_stage" value="{{stage[0]}},{{stage[1]}}"> {{ stage[2] }} - có {{stage[3]}} bài
+                        <br>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>

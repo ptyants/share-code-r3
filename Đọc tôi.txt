@@ -1,0 +1,25 @@
+Một vài mô tả:
+
+"data" tui làm kham khảo ông có thể xem qua
+file "giai-đoạn.txt" không ảnh hưởng gì đến code cả, khi "data" hoàn tất thì mới add nội dung "giai-đoạn.txt" vào stages của code
+
+Tình hình sản phẩm:
+
+ông giúp tui chỉnh cái phần 30s nha
+
+cách thức hoạt động: khi hết t.gian -> hiện thông báo, đồng thời hiện thời gian 30s đếm ngược -> kết quả
+
+	+ TH1: khi hết 30s và chưa ấn ok của comfirm thì chuyển về {{ url_for('user_view', username=username) }} hoặc ấn cancel của confirm thì chuyển về như vậy luôn
+
+	+ TH2: khi trong khoảng 30s đếm ngược mà ấn ok của comfirm thì countdown trở về 0 và countup hoạt động
+
+
+countdown, countup và comfirm thì hoạt động nhưng phần 30s thì có vấn đề nếu có t.gian ông chỉnh cái này giúp tui nha :>
+
+phần viewpage tui chưa thêm nút login logout ông thêm hộ tui nha (ông có thể lấy code từ bên Study4All và chỉnh lại cho phù hợp là đc :> )
+
+ông chỉnh thêm hộ cái này <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_1"> cho img 1 và 2 giúp tui nha
+cái hình thì ông chỉ cần giới hạn kích thước ảnh hộ tui nha, ông chỉnh kích thước sao cho nhìn ổn là ok
+
+Ông muốn bổ sung thêm file gì thì ông nên tạo link git r gửi cho tui để dễ làm việc nha :>
+Cần hỗ trợ gì thì nhắn cho tui nha :>
