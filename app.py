@@ -94,40 +94,41 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error_message = None
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
+        # Xử lý thông tin đăng nhập
+        username_or_email = request.form['username_or_email']
+        password = request.form['password']        
+        user = User.query.filter_by(username=username_or_email).first()
 
         if user and check_password_hash(user.password, password):
             # Do something after successful login
             flash('Login successful', 'success')
-            return redirect(url_for('user_view', username=username))
+            return redirect(url_for('user_view', username=user.username))
         else:
-            flash('Login failed. Please check your credentials.', 'danger')
-    return render_template('login.html')
+            error_message = "Tên đăng nhập hoặc mật khẩu không đúng!"
+            
+    return render_template('login.html', error_message=error_message)
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
+@app.route('/register', methods=['GET', 'POST'])
+def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        
         # Check if the username is already in use
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            flash('Username is already taken. Please choose another username.', 'danger')
-            return redirect(url_for('signup'))
+            return "Tên đăng nhập hoặc email đã tồn tại!"
+        new_teacher = Teachers(username=username, email=email, password=User().hash_password(password))
+        with app.app_context():
+            db.session.add(new_teacher)
+            db.session.commit()
 
-        hashed_password = generate_password_hash(password, method='sha256')
-        
-        new_user = User(username=username, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
+        return redirect(url_for('home'))
 
-        flash('Account created successfully. You can now log in.', 'success')
-        return redirect(url_for('login'))
-    return render_template('signup.html')
+    return render_template('register.html')
 
 @app.route('/choose_stage/<username>', methods=['GET', 'POST']) #khi chưa chọn bài học
 def choose_stage(username):
