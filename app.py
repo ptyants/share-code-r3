@@ -20,10 +20,12 @@ def create_tables():
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     correct_lession = db.Column(db.Integer)
     learning = db.Column(db.Integer) #chỉ có 1
     number_completed = db.Column(db.Integer)
+
     
 # [số tầng 0,1, số giai đoạn 0,1,2, số bài đã học, , tổng số bài]
    
@@ -94,41 +96,38 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error_message = None
     if request.method == 'POST':
-        # Xử lý thông tin đăng nhập
-        username_or_email = request.form['username_or_email']
-        password = request.form['password']        
-        user = User.query.filter_by(username=username_or_email).first()
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            # Do something after successful login
             flash('Login successful', 'success')
-            return redirect(url_for('user_view', username=user.username))
+            return redirect(url_for('user_view', username=username))
         else:
-            error_message = "Tên đăng nhập hoặc mật khẩu không đúng!"
-            
-    return render_template('login.html', error_message=error_message)
+            flash('Login failed. Please check your credentials.', 'danger')
+    return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-        
-        # Check if the username is already in use
+        username = request.form.get('username')
+        password = request.form.get('password')
+
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            return "Tên đăng nhập hoặc email đã tồn tại!"
-        new_teacher = Teachers(username=username, email=email, password=User().hash_password(password))
-        with app.app_context():
-            db.session.add(new_teacher)
-            db.session.commit()
+            flash('Username is already taken. Please choose another username.', 'danger')
+            return redirect(url_for('register'))
 
-        return redirect(url_for('home'))
+        hashed_password = generate_password_hash(password, method='sha256')
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
 
+        flash('Account created successfully. You can now log in.', 'success')
+        return redirect(url_for('login'))
     return render_template('register.html')
+
 
 @app.route('/choose_stage/<username>', methods=['GET', 'POST']) #khi chưa chọn bài học
 def choose_stage(username):
