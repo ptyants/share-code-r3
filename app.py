@@ -16,26 +16,30 @@ db = SQLAlchemy(app)
 def create_tables():
     with app.app_context():
         db.create_all()
-        
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     correct_lession = db.Column(db.Integer)
     learning = db.Column(db.Integer) #chỉ có 1
     number_completed = db.Column(db.Integer)
 
-    
 # [số tầng 0,1, số giai đoạn 0,1,2, số bài đã học, , tổng số bài]
-   
+
 #giai đoạn 
 stages = [
     #[nơi, giai đoạn, tên giai đoạn, số sự kiện trong giai đoạn đó (phải có thật trong file)]
-    [0,0,"pháp phổ đại chiến",1],
-    [1,0,"vua trịnh lê",3],
-    [1,1,"đại việt",4],
-    [1,2,"pháp thuộc",0]
+    [0,0 ,"Thời tiền sử",1],
+    [0,1,"Thời kỳ cổ đại",0],
+    [0,2,"Thời kỳ Trung cổ",0],
+    [0,3,"Thời kỳ cận đại",2],
+    [0,4,"Thời kỳ hiện đại",0],
+    [1,0,"Thời tiền sử",1],
+    [1,1,"Thời kỳ cổ đại",0],
+    [1,2,"Thời Bắc thuộc",0],
+    [1,3,"Thời kỳ quân chủ",0],
+    [1,4,"Thời kỳ hiện đại",2]
 ]  
 
 
@@ -70,11 +74,11 @@ def processing_lession(username, time_today):
     if number_corrected_lession == stage_info[3]:
         number_lession_ll_done = number_corrected_lession
         done_lession = True
-        
+
     else:
         sum_time_learn = 0
         while number_corrected_lession < stage_info[3]:
-            
+
             lessions = create_lession(learning[0],learning[1],number_corrected_lession)
             sum_time_learn += lessions[1]
             if sum_time_learn <= time_today:
@@ -84,8 +88,8 @@ def processing_lession(username, time_today):
             number_corrected_lession += 1
         number_lession_ll_done = number_corrected_lession
     return [list_lession_today ,number_lession_ll_done ,done_lession]
-     
-    
+
+
 
 print(create_lession(1,0,0))
 
@@ -102,6 +106,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
+            # Do something after successful login
             flash('Login successful', 'success')
             return redirect(url_for('user_view', username=username))
         else:
@@ -114,12 +119,14 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
 
+        # Check if the username is already in use
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash('Username is already taken. Please choose another username.', 'danger')
             return redirect(url_for('register'))
 
         hashed_password = generate_password_hash(password, method='sha256')
+
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
@@ -137,46 +144,46 @@ def choose_stage(username):
     if user is None:
         # Handle the case where the user doesn't exist
         return "User not found", 404
-    
+
     if request.method == 'POST':
         selected_stage  = request.form.get('selected_stage')
-        
+
         if selected_stage:
             stage_parts = selected_stage.split(',')
             history_option = [int(part) for part in stage_parts]  # Chuyển các phần tử thành số nguyên
         else:
             return "Invalid stage selected"
-        
+
         stage_info = None
         for stage in stages:
             if stage[0] == int(history_option[0]) and stage[1] == int(history_option[1]):
                 stage_info = stage
                 break
-            
+
         if stage_info is None:
             return render_template('choose_stage.html', stages=stages, username=username, message="Không tìm thấy thông tin giai đoạn tương ứng.")
-        
+
         elif stage_info[3] == 0:
             return render_template('choose_stage.html', stages=stages, username=username, message="Khóa học đang được xây dựng, xin quý khách vui lòng chọn khóa học khác.")
-        
+
         else:
             user.learning = json.dumps(history_option)
             user.number_completed = 0
             db.session.commit()   
-            
+
             #When retrieving the learning information, deserialize it back to a list:
             #learning_json = user.learning  # Retrieve the JSON string from the database
             #learning_list = json.loads(learning_json)  # Deserialize the JSON string to a list
-            
+
             return redirect(url_for('user_view', username=username))  
-      
+
     return render_template('choose_stage.html', stages=stages, username=username, message=message)
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def user_view(username):
     message = session.pop('message', None)  # Lấy thông điệp ra khỏi session nếu có
     user = User.query.filter_by(username=username).first()
-    
+
     if user is None:
         # Handle the case where the user doesn't exist
         return "User not found", 404
@@ -192,7 +199,31 @@ def user_view(username):
 
     return render_template('user_view.html', username=username, message=message)
 
+@app.route('/change_password/<username>', methods=['GET', 'POST'])
+def change_password(username):
+    user = User.query.filter_by(username=username).first()
+    
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        
+        if not user:
+            flash('User not found!', 'danger')
+            return redirect(url_for('home'))
 
+        if new_password != confirm_password:
+            flash('Password confirmation does not match!', 'danger')
+            return render_template('change_password.html', username=username)
+
+        hashed_password = generate_password_hash(new_password, method='sha256')
+
+        user.password = hashed_password
+        db.session.commit()
+
+        flash('Password changed successfully!', 'success')
+
+        return redirect(url_for('home'))
+    return render_template('change_password.html', username=username)
 
 @app.route('/learn_tab/<username>/<int:time_today>', methods=['GET', 'POST'])
 def learn_tab(username, time_today):
@@ -211,19 +242,19 @@ def learn_tab(username, time_today):
                 break
     else:
         return redirect(url_for('make_test', username=username))
-    
+
     if request.method == 'POST':
         lesson_index = int(request.form['lessonIndex']) 
-        
+
         if 'correctButton' in request.form:
             user.number_completed += 1
             db.session.commit()
             if user.number_completed == stage_info[3]:
                 return redirect(url_for('make_test', username=username))
             lesson_index = (lesson_index + 1) % total_lession_today 
-           
-            
-            
+
+
+
     return render_template('learn_tab.html', stage_info=stage_info, username=username, time_today=time_today, total_lession_today=total_lession_today, i=lesson_index, data=data)
 
 
@@ -248,9 +279,9 @@ def make_test(username):
             answers = request.form[quest]
             print("answers - ",answers)
             correct_answers += int(answers)
-            
+
         total_questions = 5
-        
+
         score = (correct_answers / total_questions) * 100
         print("score", score)
         if score>=80:
@@ -261,7 +292,7 @@ def make_test(username):
             db.session.commit()
             session['message'] = f"Điểm của bạn là {score} đã đủ chỉ tiêu"
             return redirect(url_for('choose_stage', username=username))
-            
+
         else:
             user = User.query.filter_by(username=username).first()
             user.number_completed = 0
@@ -275,6 +306,11 @@ def make_test(username):
         data_quizz = ""
     return render_template('make_test.html', username=username, data_quizz=data_quizz)
 
+@app.route('/logout')
+def logout():
+    # Clear the user's session data to log them out
+    session.clear()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     create_tables()
