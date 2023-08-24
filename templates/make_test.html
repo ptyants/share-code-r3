@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Make Test</title>
+    <!-- Thêm các đường dẫn đến các file CSS, JavaScript, và các thư viện cần thiết -->
+</head>
+<body>
+    <div>
+        <p>Bạn phải làm đúng được 80% số câu thì mới được học các giai đoạn khác</p>
+        <p>Nếu không bạn sẽ phải học lại từ đầu giai đoạn này</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('make_test', username=username) }}"> 
+        <div class="grid-container">
+            {{ data_quizz | safe }}
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

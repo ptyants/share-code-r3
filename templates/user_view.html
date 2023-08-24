@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User_view</title>
+</head>
+<body>
+    <a class="change-password-btn" href="{{ url_for('change_password', username=username) }}">Change Password</a>
+    <div>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+        <br>
+    </div>
+    <form method="POST" action="{{ url_for('user_view', username=username) }}">
+        <label for="time_today">Bạn có bao nhiêu thời gian: </label>
+        <input type="number" id="time_today" name="time_today" placeholder="1" required min="1"> phút
+        <button type="submit">Submit</button>
+    </form>
+    <script>
+        // Remove stored countdown and countup value from Local Storage
+        localStorage.removeItem("countdownValue");
+        localStorage.removeItem("countupValue");
+    </script>
+</body>
+</html>

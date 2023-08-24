@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn_tab</title>
+</head>
+<body>
+    <div> 
+        <h1>Giai đoạn: {{ stage_info[2] }}</h1>
+        <hr>
+        <div>
+            <p>Countdown: <span id="countdown">{{ time_today }}</span></p>
+            <p>Count-up: <span id="countup">0</span></p>
+        </div>
+        <hr>
+        <h2>{{data[0][i][0]}}</h2>
+        {% for ar in data[0][i][2] %}
+                <pre><p>{{ar}}</p></pre>
+        {% endfor %}
+        <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_1">
+        <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_2">
+    </div>
+    <button id="alertButton">Alert</button>
+    <form method="POST">
+        <input type="hidden" id="lessonIndex" name="lessonIndex" value="{{ i }}">
+        <button type="submit" name="correctButton" id="correctButton">Correct</button>
+    </form>
+    <script>
+        // Load stored countdown value from Local Storage
+        var storedCountdown = localStorage.getItem("countdownValue") || {{ time_today }};
+        var storedCountup = localStorage.getItem("countdupValue") || 0;
+        var countdown = storedCountdown * 60;  // Convert minutes to seconds
+
+        function updateCountdownDisplay() {
+            var countdownDisplay = document.getElementById("countdown");
+            var minutes = Math.floor(countdown / 60);
+            var seconds = countdown % 60;
+            countdownDisplay.innerHTML = minutes + " : " + (seconds < 10 ? "0" : "") + seconds;
+        }
+
+        function startCountdown() {
+            updateCountdownDisplay();
+
+            var countdownTimer = setInterval(function() {
+                countdown -= 1;
+                updateCountdownDisplay();
+
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    showConfirmation();
+                }
+            }, 1000);  // Countdown every second
+        }
+
+        function showConfirmation() {
+            // Display an alert to the user
+            var userResponse = confirm("Bạn có đang đọc không?");
+            startUserResponseCountdown();
+            if (userResponse) {
+                
+            } else {
+                window.location.href = "{{ url_for('user_view', username=username) }}";
+            }
+        }
+
+        function startUserResponseCountdown() {
+            countdown = 30;
+            updateCountdownDisplay();
+
+            var countdownTimer = setInterval(function() {
+                countdown -= 1;
+                updateCountdownDisplay();
+
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    // Redirect or perform any other action after countdown
+                    window.location.href = "{{ url_for('user_view', username=username) }}";
+                }
+            }, 1000);  // Countdown every second
+        }
+
+        // Save updated countdown value to Local Storage
+        window.onbeforeunload = function() {
+            localStorage.setItem("countdownValue", Math.floor(countdown / 60));
+        };
+        
+
+        window.onload = startCountdown;
+    </script>
+</body>
+</html>

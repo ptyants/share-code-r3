@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn_tab</title>
+</head>
+<body>
+    <div> 
+        <!--h1>Giai đoạn: {{ stage_info[2] }}</h1-->
+        <h1>{{ stage_info[2] }}</h1>
+        <hr>
+        <div>
+            <p>Countdown: <span id="countdown">{{ time_today }}</span></p>
+            <p>Count-up: <span id="countup">0</span></p>
+        </div>
+        <hr>
+        <h2>{{data[0][i][0]}}</h2>
+        {% for ar in data[0][i][2] %}
+                <pre><p>{{ar}}</p></pre>
+        {% endfor %}
+        <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_1">
+        <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_2">
+    </div>
+    <form method="POST">
+        <input type="hidden" id="lessonIndex" name="lessonIndex" value="{{ i }}">
+        <button type="submit" name="correctButton" id="correctButton">Correct</button>
+    </form>
+    <script>
+        function startCountdown() {
+            var countdown = {{ time_today }} * 60;  // Convert minutes to seconds
+            var countdownDisplay = document.getElementById("countdown");
+        
+            function updateCountdownDisplay() {
+                var minutes = Math.floor(countdown / 60);
+                var seconds = countdown % 60;
+                countdownDisplay.innerHTML = minutes + " : " + (seconds < 10 ? "0" : "") + seconds;
+            }
+        
+            updateCountdownDisplay();
+        
+            var countdownTimer = setInterval(function() {
+                countdown -= 1;
+                updateCountdownDisplay();
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    var userResponse = confirm("Bạn có đang đọc không?");
+                    if (userResponse) {
+                        countdown = 30;  // Set the countdown time for the user response
+                        countdownDisplay.innerHTML = "0 : 30";
+                        var userResponseTimer = setInterval(function() {
+                            countdown -= 1;
+                            updateCountdownDisplay();
+                            if (countdown <= 0) {
+                                clearInterval(userResponseTimer);
+                                window.location.href = "{{ url_for('user_view', username=username) }}";
+                            }
+                        }, 1000);  // Countdown every second
+                    } 
+                }
+            }, 1000);  // Countdown every second
+        }
+        
+        window.onload = startCountdown;
+    </script>
+</body>
+</html>
