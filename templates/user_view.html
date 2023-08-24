@@ -6,6 +6,7 @@
     <title>User_view</title>
 </head>
 <body>
+    <a class="change-password-btn" href="{{ url_for('change_password', username=username) }}">Change password</a>
     <div>
         {% if message %}
             <p>{{ message }}</p>
