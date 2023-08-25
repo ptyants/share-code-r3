@@ -6,7 +6,7 @@
     <title>Learn_tab</title>
 </head>
 <body>
-    <div>
+    <div> 
         <h1>Giai đoạn: {{ stage_info[2] }}</h1>
         <hr>
         <div>
@@ -16,7 +16,7 @@
         <hr>
         <h2>{{data[0][i][0]}}</h2>
         {% for ar in data[0][i][2] %}
-            <pre><p>{{ar}}</p></pre>
+                <pre><p>{{ar}}</p></pre>
         {% endfor %}
         <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_1">
         <img src="{{ url_for('static', filename='uploads/' + data[0][i][3]) }}" alt="Image_2">
@@ -27,82 +27,66 @@
         <button type="submit" name="correctButton" id="correctButton">Correct</button>
     </form>
     <script>
+        // Load stored countdown value from Local Storage
         var storedCountdown = localStorage.getItem("countdownValue") || {{ time_today }};
-        var storedCountup = localStorage.getItem("countupValue") || 0;
-        var countdown = storedCountdown * 60; // Convert minutes to seconds
-        var countup = storedCountup;
-        var userResponse = false; // Initialize user response
-    
+        var storedCountup = localStorage.getItem("countdupValue") || 0;
+        var countdown = storedCountdown * 60;  // Convert minutes to seconds
+
         function updateCountdownDisplay() {
             var countdownDisplay = document.getElementById("countdown");
             var minutes = Math.floor(countdown / 60);
             var seconds = countdown % 60;
             countdownDisplay.innerHTML = minutes + " : " + (seconds < 10 ? "0" : "") + seconds;
         }
-    
-        function updateCountupDisplay() {
-            var countupDisplay = document.getElementById("countup");
-            var minutes = Math.floor(countup / 60);
-            var seconds = countup % 60;
-            countupDisplay.innerHTML = minutes + " : " + (seconds < 10 ? "0" : "") + seconds;
-        }
-    
+
         function startCountdown() {
             updateCountdownDisplay();
-    
-            var countdownTimer = setInterval(function () {
+
+            var countdownTimer = setInterval(function() {
                 countdown -= 1;
                 updateCountdownDisplay();
-    
+
                 if (countdown <= 0) {
-                    showConfirmation();
                     clearInterval(countdownTimer);
-                    //window.location.href = "{{ url_for('user_view', username=username) }}";
+                    showConfirmation();
                 }
-            }, 1000); // Countdown every second
+            }, 1000);  // Countdown every second
         }
-    
-        function startCountup() {
-            updateCountupDisplay();
-    
-            var countupTimer = setInterval(function () {
-                countup += 1;
-                updateCountupDisplay();
-                countdown = 0; // Reset countdown when count-up starts
-                updateCountdownDisplay();
-            }, 1000); // Update count-up every second
-        }
-    
+
         function showConfirmation() {
-            userResponse = confirm("Bạn có đang đọc không?");
+            // Display an alert to the user
+            var userResponse = confirm("Bạn có đang đọc không?");
             startUserResponseCountdown();
             if (userResponse) {
-                startCountup();
+                
             } else {
                 window.location.href = "{{ url_for('user_view', username=username) }}";
             }
         }
-    
+
         function startUserResponseCountdown() {
             countdown = 30;
             updateCountdownDisplay();
-    
-            var countdownTimer = setInterval(function () {
+
+            var countdownTimer = setInterval(function() {
                 countdown -= 1;
                 updateCountdownDisplay();
-    
-                if (countdown <= 0 && !userResponse) {
+
+                if (countdown <= 0) {
                     clearInterval(countdownTimer);
+                    // Redirect or perform any other action after countdown
                     window.location.href = "{{ url_for('user_view', username=username) }}";
                 }
-            }, 1000); // Countdown every second
+            }, 1000);  // Countdown every second
         }
-    
-        window.onbeforeunload = function () {
+
+        // Save updated countdown value to Local Storage
+        window.onbeforeunload = function() {
             localStorage.setItem("countdownValue", Math.floor(countdown / 60));
-            localStorage.setItem("countupValue", countup);
         };
-    
+        
+
         window.onload = startCountdown;
     </script>
 </body>
+</html>
